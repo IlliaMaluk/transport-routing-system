@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Optional, Literal
+from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 # Допустимі критерії оптимізації
 OptimizationCriterion = Literal["time", "distance", "cost", "transfers"]

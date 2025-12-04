@@ -139,8 +139,18 @@ export interface TokenResponse {
 // ---------- Базові налаштування клієнта ----------
 
 // ВАЖЛИВО: тут є експорт API_BASE_URL, який очікує AuthContext
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const apiBaseFromEnv = import.meta.env.VITE_API_URL?.toString().trim();
+
+// За замовчуванням пробуємо поточний origin (щоб працювало з Vite proxy на /api)
+// і fallback на локальний бекенд:8000 для старих налаштувань
+const defaultApiBase = (() => {
+  if (typeof window === "undefined") return "http://localhost:8000/api";
+  const { protocol, hostname, port } = window.location;
+  const normalizedPort = port ? `:${port}` : "";
+  return `${protocol}//${hostname}${normalizedPort}/api`;
+})();
+
+export const API_BASE_URL = apiBaseFromEnv || defaultApiBase;
 
 const API_URL = API_BASE_URL;
 
@@ -164,7 +174,13 @@ async function handleResponse<T>(res: Response): Promise<T> {
     } catch {
       // ignore
     }
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+
+    const hint =
+      res.status >= 500 && text.trim().length === 0
+        ? ` — is the FastAPI backend running at ${API_URL}?`
+        : "";
+
+    throw new Error(`HTTP ${res.status}: ${text || res.statusText}${hint}`);
   }
   if (res.status === 204) {
     return undefined as T;
@@ -198,10 +214,19 @@ export async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers, // Record<string, string> perfectly підходить під RequestInit["headers"]
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers, // Record<string, string> perfectly підходить під RequestInit["headers"]
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `Cannot reach API at ${API_URL}. Ensure the FastAPI backend is running (see README Quick start). Original error: ${message}`,
+    );
+  }
 
   return handleResponse<T>(res);
 }
