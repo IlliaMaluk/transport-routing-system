@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import threading
-from typing import List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
-import routing_core  # це наш Rust-модуль (PyO3)
+try:
+    import routing_core  # type: ignore
+except ImportError as e:  # pragma: no cover - handled at runtime
+    routing_core = None
+    _import_error: Optional[ImportError] = e
+else:
+    _import_error = None
 
 
 class GraphManager:
@@ -12,6 +18,12 @@ class GraphManager:
     """
 
     def __init__(self) -> None:
+        if routing_core is None:
+            raise RuntimeError(
+                "routing_core не встановлено. Запустіть `pip install -e core` "
+                "або `maturin develop` у каталозі core (у тій самій venv)."
+            )
+
         self._graph = routing_core.PyGraph()
         self._lock = threading.Lock()
 
@@ -113,4 +125,26 @@ class GraphManager:
         return [(float(d), list(p)) for d, p in results]
 
 
-graph_manager = GraphManager()
+_graph_manager: Optional[GraphManager] = None
+
+
+def get_or_create_graph_manager() -> GraphManager:
+    """Лінива ініціалізація GraphManager.
+
+    Якщо Rust-модуль не зібрано, повертаємо зрозуміле виключення замість
+    неочікуваного ImportError при старті сервера.
+    """
+
+    global _graph_manager
+
+    if _graph_manager is not None:
+        return _graph_manager
+
+    if _import_error is not None:
+        raise RuntimeError(
+            "routing_core не встановлено. Запустіть `pip install -e core` "
+            "або `maturin develop` у каталозі core (у тій самій venv)."
+        )
+
+    _graph_manager = GraphManager()
+    return _graph_manager
