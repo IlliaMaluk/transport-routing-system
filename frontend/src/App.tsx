@@ -66,7 +66,16 @@ const MainContent: React.FC = () => {
       setInitializing(true);
       setInitError(null);
       const info = await getGraphInfo();
+      setGraphInfo(info);
+
       if (info.edge_count === 0) {
+        if (!user) {
+          setInitError(
+            "Граф порожній. Увійдіть або зареєструйтесь, щоб додати тестові ребра."
+          );
+          return;
+        }
+
         const newInfo = await addEdges({
           edges: [
             { from_node: 0, to_node: 1, weight: 5.0 },
@@ -75,8 +84,6 @@ const MainContent: React.FC = () => {
           ],
         });
         setGraphInfo(newInfo);
-      } else {
-        setGraphInfo(info);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -92,7 +99,7 @@ const MainContent: React.FC = () => {
       await refreshPerformanceAndHistory();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   const handleRouteLoaded = async (route: RouteResponse) => {
     setCurrentRoute(route);
