@@ -23,6 +23,7 @@ interface AuthContextValue {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, fullName?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -106,6 +107,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     [fetchCurrentUser]
   );
 
+  const register = useCallback(
+    async (email: string, password: string, fullName?: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          full_name: fullName ?? null,
+        }),
+      });
+
+      if (!response.ok) {
+        let msg = "Помилка реєстрації";
+        try {
+          const err = await response.json();
+          if (err && err.detail) msg = err.detail;
+        } catch {
+          // ignore
+        }
+        throw new Error(msg);
+      }
+
+      // Після успішної реєстрації автоматично логінимо
+      await login(email, password);
+    },
+    [login]
+  );
+
   const logout = useCallback(() => {
     localStorage.removeItem("auth_token");
     setToken(null);
@@ -117,6 +149,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     token,
     loading,
     login,
+    register,
     logout,
   };
 

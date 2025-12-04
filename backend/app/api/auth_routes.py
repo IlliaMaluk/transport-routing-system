@@ -5,6 +5,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
@@ -54,9 +55,23 @@ def register_user(
         role="operator",
         is_active=True,
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+
+    try:
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Користувач із таким email вже існує",
+        )
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Не вдалося створити користувача",
+        )
 
     return UserResponse(
         id=user.id,
