@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import csv
 from io import TextIOWrapper
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
