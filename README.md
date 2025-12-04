@@ -23,7 +23,13 @@ maturin develop  # builds and installs routing_core into the current Python envi
 ```bash
 cd backend
 python -m venv .venv
-.\.venv\Scripts\activate
+# Linux/macOS
+source .venv/bin/activate
+# Windows PowerShell
+./.venv/Scripts/Activate.ps1
+# Windows cmd.exe
+\.\.venv\Scripts\activate
+
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -38,6 +44,8 @@ npm run dev -- --host --port 5173
 ```
 - During local dev the Vite dev server proxies `/api` to `http://localhost:8000`, so keep the backend running on port 8000.
 - If your backend lives elsewhere (e.g., Docker compose hostname or HTTPS gateway), set `VITE_API_URL` in a `.env` file, e.g. `VITE_API_URL=https://my-host.example.com/api`.
+
+**If you see HTTP 500 / “Failed to fetch” in the UI**: it almost always means the backend is not reachable from the frontend. Make sure `uvicorn` from step 2 is running and listening on `0.0.0.0:8000`, or point `VITE_API_URL` to the correct host:port before restarting `npm run dev`.
 
 ### Troubleshooting API connectivity
 - Browser "Failed to fetch" or HTTP 500 from `/api/*` while using `npm run dev` usually means the FastAPI backend is not running or is listening on a different port/host. Start it on `0.0.0.0:8000` (see step 2) or point `VITE_API_URL` to the correct base URL.
