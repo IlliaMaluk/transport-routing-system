@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 import {
   GraphInfoResponse,
   RouteBatchItem,
@@ -19,6 +20,7 @@ import { HistoryPanel } from "./components/HistoryPanel";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AuthStatusBar from "./components/AuthStatusBar";
 import LoginForm from "./components/LoginForm";
+import AuthPage from "./pages/AuthPage";
 
 const MainContent: React.FC = () => {
   const [graphInfo, setGraphInfo] = useState<GraphInfoResponse | undefined>();
@@ -107,11 +109,21 @@ const MainContent: React.FC = () => {
   return (
     <div className="app-root">
       <header className="app-header">
-        <h1>Веб-система визначення оптимального шляху</h1>
-        <p className="subtitle">
-          Транспортні мережі, паралельний пошук маршрутів (Rust + FastAPI +
-          React)
-        </p>
+        <div className="flex justify-between items-center w-full">
+          <div>
+            <h1>Веб-система визначення оптимального шляху</h1>
+            <p className="subtitle">
+              Транспортні мережі, паралельний пошук маршрутів (Rust + FastAPI +
+              React)
+            </p>
+          </div>
+          <Link
+            to="/auth"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 text-sm font-medium hover:bg-gray-50"
+          >
+            🔐 Увійти / Реєстрація
+          </Link>
+        </div>
       </header>
 
       {/* Панель статусу користувача */}
@@ -176,7 +188,11 @@ const MainContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <MainContent />
+      <Routes>
+        <Route path="/" element={<MainContent />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </AuthProvider>
   );
 };
