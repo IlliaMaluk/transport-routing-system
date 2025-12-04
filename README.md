@@ -36,7 +36,8 @@ cd frontend
 npm install
 npm run dev -- --host --port 5173
 ```
-- The UI expects the backend at `http://localhost:8000`; adjust API base URL in `frontend/src/api/client.ts` if needed.
+- During local dev the Vite dev server proxies `/api` to `http://localhost:8000`, so keep the backend running on port 8000.
+- If your backend lives elsewhere (e.g., Docker compose hostname or HTTPS gateway), set `VITE_API_URL` in a `.env` file, e.g. `VITE_API_URL=https://my-host.example.com/api`.
 
 ## How the functional requirements map
 Implemented highlights:

@@ -139,8 +139,18 @@ export interface TokenResponse {
 // ---------- Базові налаштування клієнта ----------
 
 // ВАЖЛИВО: тут є експорт API_BASE_URL, який очікує AuthContext
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const apiBaseFromEnv = import.meta.env.VITE_API_URL?.toString().trim();
+
+// За замовчуванням пробуємо поточний origin (щоб працювало з Vite proxy на /api)
+// і fallback на локальний бекенд:8000 для старих налаштувань
+const defaultApiBase = (() => {
+  if (typeof window === "undefined") return "http://localhost:8000/api";
+  const { protocol, hostname, port } = window.location;
+  const normalizedPort = port ? `:${port}` : "";
+  return `${protocol}//${hostname}${normalizedPort}/api`;
+})();
+
+export const API_BASE_URL = apiBaseFromEnv || defaultApiBase;
 
 const API_URL = API_BASE_URL;
 
