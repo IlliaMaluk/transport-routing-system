@@ -290,31 +290,3 @@ class AsyncJobsMetricsResponse(BaseModel):
     cpu_usage_percent: Optional[float]
     gpu_usage_percent: Optional[float]
 
-
-# ---------- Auth / Users ----------
-
-
-class UserBase(BaseModel):
-    email: EmailStr
-    full_name: Optional[str] = None
-
-
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=4, max_length=128)
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class UserResponse(UserBase):
-    id: int
-    role: str
-    is_active: bool
-    created_at: datetime
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
