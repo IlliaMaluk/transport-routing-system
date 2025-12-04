@@ -120,25 +120,8 @@ export interface AsyncJobsMetricsResponse {
   gpu_usage_percent?: number | null;
 }
 
-// ---------- Auth типи (для зручності) ----------
-
-export interface User {
-  id: number;
-  email: string;
-  full_name: string | null;
-  role: string;
-  is_active: boolean;
-  created_at: string;
-}
-
-export interface TokenResponse {
-  access_token: string;
-  token_type: string;
-}
-
 // ---------- Базові налаштування клієнта ----------
 
-// ВАЖЛИВО: тут є експорт API_BASE_URL, який очікує AuthContext
 const apiBaseFromEnv = import.meta.env.VITE_API_URL?.toString().trim();
 
 // За замовчуванням пробуємо поточний origin (щоб працювало з Vite proxy на /api)
@@ -153,18 +136,6 @@ const defaultApiBase = (() => {
 export const API_BASE_URL = apiBaseFromEnv || defaultApiBase;
 
 const API_URL = API_BASE_URL;
-
-export function setAuthToken(token: string | null) {
-  if (token) {
-    localStorage.setItem("auth_token", token);
-  } else {
-    localStorage.removeItem("auth_token");
-  }
-}
-
-export function getAuthToken(): string | null {
-  return localStorage.getItem("auth_token");
-}
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -191,15 +162,12 @@ async function handleResponse<T>(res: Response): Promise<T> {
 /**
  * Загальний fetch:
  *  - додає базовий URL
- *  - додає Authorization: Bearer <token>, якщо є
  *  - обробляє помилки
  */
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = getAuthToken();
-
   // Використовуємо звичайний об’єкт, а не HeadersInit
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -208,10 +176,6 @@ export async function apiFetch<T>(
   // Якщо в options.headers щось передали — додаємо
   if (options.headers) {
     Object.assign(headers, options.headers as Record<string, string>);
-  }
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
   }
 
   let res: Response;

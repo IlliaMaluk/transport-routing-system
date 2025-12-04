@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import {
   GraphInfoResponse,
   RouteBatchItem,
@@ -17,10 +17,6 @@ import { StatsPanel } from "./components/StatsPanel";
 import { MapView } from "./components/MapView";
 import { HistoryPanel } from "./components/HistoryPanel";
 
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import AuthStatusBar from "./components/AuthStatusBar";
-import LoginForm from "./components/LoginForm";
-import AuthPage from "./pages/AuthPage";
 
 const MainContent: React.FC = () => {
   const [graphInfo, setGraphInfo] = useState<GraphInfoResponse | undefined>();
@@ -35,8 +31,6 @@ const MainContent: React.FC = () => {
 
   const [initializing, setInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<string | null>(null);
-
-  const { user } = useAuth();
 
   const refreshGraphInfo = async () => {
     try {
@@ -69,13 +63,6 @@ const MainContent: React.FC = () => {
       setGraphInfo(info);
 
       if (info.edge_count === 0) {
-        if (!user) {
-          setInitError(
-            "Граф порожній. Увійдіть або зареєструйтесь, щоб додати тестові ребра."
-          );
-          return;
-        }
-
         const newInfo = await addEdges({
           edges: [
             { from_node: 0, to_node: 1, weight: 5.0 },
@@ -99,7 +86,7 @@ const MainContent: React.FC = () => {
       await refreshPerformanceAndHistory();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, []);
 
   const handleRouteLoaded = async (route: RouteResponse) => {
     setCurrentRoute(route);
@@ -124,30 +111,14 @@ const MainContent: React.FC = () => {
               React)
             </p>
           </div>
-          <Link
-            to="/auth"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 text-sm font-medium hover:bg-gray-50"
-          >
-            🔐 Увійти / Реєстрація
-          </Link>
         </div>
       </header>
-
-      {/* Панель статусу користувача */}
-      <AuthStatusBar />
 
       <main className="app-main">
         <section className="left-column">
           {initError && (
             <div className="error-box">
               Помилка ініціалізації графа: {initError}
-            </div>
-          )}
-
-          {/* Якщо користувач не залогінений — показуємо форму логіну */}
-          {!user && (
-            <div style={{ marginBottom: "1rem" }}>
-              <LoginForm />
             </div>
           )}
 
@@ -191,16 +162,12 @@ const MainContent: React.FC = () => {
   );
 };
 
-// Обгортаємо весь додаток у AuthProvider
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<MainContent />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AuthProvider>
+    <Routes>
+      <Route path="/" element={<MainContent />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
