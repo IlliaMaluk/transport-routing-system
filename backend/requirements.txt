@@ -4,5 +4,3 @@ pydantic
 python-multipart
 sqlalchemy
 psutil
-passlib[bcrypt]
-python-jose[cryptography]

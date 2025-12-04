@@ -1,1 +1,1 @@
-from .graph_manager import GraphManager, graph_manager
+from .graph_manager import GraphManager, get_or_create_graph_manager

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
 from app.models.dto import RouteBatchRequest, RouteBatchItem
-from app.services.graph_manager import graph_manager
+from app.services.graph_manager import get_or_create_graph_manager
 from app.services.routing_service import find_routes_batch
 
 
@@ -85,7 +85,8 @@ class RoutingJobManager:
         db: Session = SessionLocal()
         try:
             # Використовуємо існуючий паралельний batch-пошук
-            result = find_routes_batch(graph_manager, job.request, db)
+            manager = get_or_create_graph_manager()
+            result = find_routes_batch(manager, job.request, db)
             finished_at = time.time()
             with self._lock:
                 job = self._jobs.get(job_id)

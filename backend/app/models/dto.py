@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 # Допустимі критерії оптимізації
 OptimizationCriterion = Literal["time", "distance", "cost", "transfers"]
@@ -294,27 +294,3 @@ class AsyncJobsMetricsResponse(BaseModel):
 # ---------- Auth / Users ----------
 
 
-class UserBase(BaseModel):
-    email: EmailStr
-    full_name: Optional[str] = None
-
-
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=4, max_length=128)
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class UserResponse(UserBase):
-    id: int
-    role: str
-    is_active: bool
-    created_at: datetime
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"

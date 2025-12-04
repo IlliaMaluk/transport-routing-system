@@ -9,7 +9,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_graph_manager, get_db
-from app.auth.security import require_roles
 from app.models.dto import (
     EdgeBulkCreateRequest,
     GraphInfoResponse,
@@ -89,7 +88,6 @@ def get_graph_info(
 def add_nodes(
     payload: NodeBulkCreateRequest,
     manager: GraphManager = Depends(get_graph_manager),
-    current_user=Depends(require_roles("admin", "operator")),
 ) -> GraphInfoResponse:
     for node in payload.nodes:
         manager.add_node(node.id)
@@ -101,7 +99,6 @@ def add_nodes(
 def add_edges(
     payload: EdgeBulkCreateRequest,
     manager: GraphManager = Depends(get_graph_manager),
-    current_user=Depends(require_roles("admin", "operator")),
 ) -> GraphInfoResponse:
     edges_tuples = [
         (edge.from_node, edge.to_node, edge.weight)
@@ -117,7 +114,6 @@ def import_graph_from_csv(
     file: UploadFile = File(..., description="CSV з from/to/weight та опціональними метаданими"),
     manager: GraphManager = Depends(get_graph_manager),
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("admin")),
 ) -> CsvImportResponse:
     summary = import_edges_from_csv(manager, file, db)
     node_count, edge_count = manager.stats()
@@ -189,7 +185,6 @@ def check_graph_quality(
 def fix_graph_quality_endpoint(
     manager: GraphManager = Depends(get_graph_manager),
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("admin")),
 ) -> GraphQualityFixResponse:
     quality = analyze_graph_quality(manager)
     fix_result = fix_graph_quality(manager, db, quality)
@@ -228,7 +223,6 @@ def compute_routes_batch(
 @router.post("/routes/async/submit", response_model=AsyncJobStatus)
 def submit_async_routes(
     batch_request: RouteBatchRequest,
-    current_user=Depends(require_roles("admin", "operator")),
 ) -> AsyncJobStatus:
     """
     Створює асинхронну batch-задачу пошуку маршрутів.
@@ -372,7 +366,6 @@ def get_performance_stats(
 def create_scenario(
     payload: ScenarioCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("admin", "operator")),
 ) -> ScenarioResponse:
     existing = (
         db.query(Scenario)
@@ -459,7 +452,6 @@ def add_scenario_modifications(
     scenario_id: int,
     payload: List[ScenarioModificationCreate],
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("admin", "operator")),
 ) -> ScenarioDetailResponse:
     scenario = db.query(Scenario).filter(Scenario.id == scenario_id).first()
     if scenario is None:
@@ -488,7 +480,6 @@ def add_scenario_modifications(
 def create_profile(
     payload: OptimizationProfileCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles("admin", "operator")),
 ) -> OptimizationProfileResponse:
     existing = (
         db.query(OptimizationProfile)

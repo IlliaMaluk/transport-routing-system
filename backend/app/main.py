@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.api import routes, auth_routes
+from app.api import routes
 
 # Створюємо всі таблиці
 Base.metadata.create_all(bind=engine)
@@ -23,6 +23,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Маршрути
-app.include_router(auth_routes.router, prefix="/api")
 app.include_router(routes.router, prefix="/api")

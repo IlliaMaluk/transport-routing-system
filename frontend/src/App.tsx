@@ -16,25 +16,15 @@ import { StatsPanel } from "./components/StatsPanel";
 import { MapView } from "./components/MapView";
 import { HistoryPanel } from "./components/HistoryPanel";
 
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import AuthStatusBar from "./components/AuthStatusBar";
-import LoginForm from "./components/LoginForm";
-
-const MainContent: React.FC = () => {
+const App: React.FC = () => {
   const [graphInfo, setGraphInfo] = useState<GraphInfoResponse | undefined>();
   const [currentRoute, setCurrentRoute] = useState<RouteResponse | undefined>();
   const [batchItems, setBatchItems] = useState<RouteBatchItem[] | undefined>();
-  const [performance, setPerformance] = useState<
-    PerformanceStatsResponse | undefined
-  >();
-  const [historyItems, setHistoryItems] = useState<
-    RouteHistoryItem[] | undefined
-  >();
+  const [performance, setPerformance] = useState<PerformanceStatsResponse | undefined>();
+  const [historyItems, setHistoryItems] = useState<RouteHistoryItem[] | undefined>();
 
   const [initializing, setInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<string | null>(null);
-
-  const { user } = useAuth();
 
   const refreshGraphInfo = async () => {
     try {
@@ -58,12 +48,13 @@ const MainContent: React.FC = () => {
     }
   };
 
-  // Для зручності: при першому запуску — створимо простий тестовий граф, якщо він порожній
   const initializeGraphIfEmpty = async () => {
     try {
       setInitializing(true);
       setInitError(null);
       const info = await getGraphInfo();
+      setGraphInfo(info);
+
       if (info.edge_count === 0) {
         const newInfo = await addEdges({
           edges: [
@@ -73,8 +64,6 @@ const MainContent: React.FC = () => {
           ],
         });
         setGraphInfo(newInfo);
-      } else {
-        setGraphInfo(info);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -107,37 +96,25 @@ const MainContent: React.FC = () => {
   return (
     <div className="app-root">
       <header className="app-header">
-        <h1>Веб-система визначення оптимального шляху</h1>
-        <p className="subtitle">
-          Транспортні мережі, паралельний пошук маршрутів (Rust + FastAPI +
-          React)
-        </p>
+        <div className="flex justify-between items-center w-full">
+          <div>
+            <h1>Веб-система визначення оптимального шляху</h1>
+            <p className="subtitle">
+              Транспортні мережі, паралельний пошук маршрутів (Rust + FastAPI + React)
+            </p>
+          </div>
+        </div>
       </header>
-
-      {/* Панель статусу користувача */}
-      <AuthStatusBar />
 
       <main className="app-main">
         <section className="left-column">
           {initError && (
-            <div className="error-box">
-              Помилка ініціалізації графа: {initError}
-            </div>
-          )}
-
-          {/* Якщо користувач не залогінений — показуємо форму логіну */}
-          {!user && (
-            <div style={{ marginBottom: "1rem" }}>
-              <LoginForm />
-            </div>
+            <div className="error-box">Помилка ініціалізації графа: {initError}</div>
           )}
 
           <RouteForm onRouteLoaded={handleRouteLoaded} disabled={initializing} />
 
-          <BatchRouteForm
-            onBatchResult={handleBatchResult}
-            disabled={initializing}
-          />
+          <BatchRouteForm onBatchResult={handleBatchResult} disabled={initializing} />
 
           <StatsPanel
             graphInfo={graphInfo}
@@ -158,8 +135,7 @@ const MainContent: React.FC = () => {
                 Вага: <strong>{currentRoute.total_weight}</strong>
               </p>
               <p>
-                Час обчислення:{" "}
-                <strong>{currentRoute.execution_time_ms.toFixed(2)} ms</strong>
+                Час обчислення: <strong>{currentRoute.execution_time_ms.toFixed(2)} ms</strong>
               </p>
               <p>Шлях: {currentRoute.nodes.join(" → ")}</p>
             </div>
@@ -169,15 +145,6 @@ const MainContent: React.FC = () => {
         </section>
       </main>
     </div>
-  );
-};
-
-// Обгортаємо весь додаток у AuthProvider
-const App: React.FC = () => {
-  return (
-    <AuthProvider>
-      <MainContent />
-    </AuthProvider>
   );
 };
 
