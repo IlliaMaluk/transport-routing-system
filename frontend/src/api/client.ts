@@ -174,7 +174,13 @@ async function handleResponse<T>(res: Response): Promise<T> {
     } catch {
       // ignore
     }
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+
+    const hint =
+      res.status >= 500 && text.trim().length === 0
+        ? ` — is the FastAPI backend running at ${API_URL}?`
+        : "";
+
+    throw new Error(`HTTP ${res.status}: ${text || res.statusText}${hint}`);
   }
   if (res.status === 204) {
     return undefined as T;
@@ -208,10 +214,19 @@ export async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers, // Record<string, string> perfectly підходить під RequestInit["headers"]
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers, // Record<string, string> perfectly підходить під RequestInit["headers"]
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `Cannot reach API at ${API_URL}. Ensure the FastAPI backend is running (see README Quick start). Original error: ${message}`,
+    );
+  }
 
   return handleResponse<T>(res);
 }

@@ -39,6 +39,10 @@ npm run dev -- --host --port 5173
 - During local dev the Vite dev server proxies `/api` to `http://localhost:8000`, so keep the backend running on port 8000.
 - If your backend lives elsewhere (e.g., Docker compose hostname or HTTPS gateway), set `VITE_API_URL` in a `.env` file, e.g. `VITE_API_URL=https://my-host.example.com/api`.
 
+### Troubleshooting API connectivity
+- Browser "Failed to fetch" or HTTP 500 from `/api/*` while using `npm run dev` usually means the FastAPI backend is not running or is listening on a different port/host. Start it on `0.0.0.0:8000` (see step 2) or point `VITE_API_URL` to the correct base URL.
+- If you see the UI banner "Cannot reach API …" make sure the Rust core is built (`maturin develop`), dependencies are installed in the backend venv, and there are no startup errors in the terminal running `uvicorn`.
+
 ## How the functional requirements map
 Implemented highlights:
 - Graph management: CSV import with metadata persistence, node/edge bulk creation, and quality checks/fixes (isolated nodes, zero-weight cycles).
