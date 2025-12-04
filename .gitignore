@@ -1,0 +1,75 @@
+# --- Python / backend ---
+
+# virtualenv
+venv*/
+.venv*/
+
+# байт-код та кеші
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# egg/info
+*.egg-info/
+*.egg
+
+# локальна БД
+backend/routing.db
+*.sqlite3
+
+# різні кеші тестів/інструментів
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+
+# --- Rust / core ---
+
+core/target/
+
+
+# --- Frontend (Node.js / React / Vite) ---
+
+# загальні Node-папки
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+
+# якщо є lock-файл — не обов'язково ігнорити, але якщо не хочеш комітити:
+# package-lock.json
+# yarn.lock
+
+# для Vite / build
+frontend/dist/
+frontend/.vite/
+
+# інші кеші (на всякий випадок)
+frontend/.turbo/
+frontend/.parcel-cache/
+
+
+# --- IDE / редактори ---
+
+# JetBrains (IntelliJ IDEA, WebStorm, PyCharm)
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# інше
+*.swp
+*.swo
+
+
+# --- ОС-файли ---
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
