@@ -13,13 +13,7 @@ A thesis-grade web system for computing optimal routes in transport networks. Th
 - Rust toolchain + `maturin` (`pip install maturin`)
 - Node.js 18+
 
-### 1) Build the Rust routing core
-```bash
-cd core
-maturin develop  # builds and installs routing_core into the current Python environment
-```
-
-### 2) Run the FastAPI backend
+### 1) Build the Rust routing core (in the same venv you'll run the API)
 ```bash
 cd backend
 python -m venv .venv
@@ -30,6 +24,15 @@ source .venv/bin/activate
 # Windows cmd.exe
 \.\.venv\Scripts\activate
 
+# Install maturin if missing and build the PyO3 extension into this venv
+pip install maturin
+cd ../core
+maturin develop  # builds and installs routing_core into the *active* Python environment
+```
+
+### 2) Run the FastAPI backend
+```bash
+cd ../backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -49,7 +52,7 @@ npm run dev -- --host --port 5173
 
 ### Troubleshooting API connectivity
 - Browser "Failed to fetch" or HTTP 500 from `/api/*` while using `npm run dev` usually means the FastAPI backend is not running or is listening on a different port/host. Start it on `0.0.0.0:8000` (see step 2) or point `VITE_API_URL` to the correct base URL.
-- If you see the UI banner "Cannot reach API …" make sure the Rust core is built (`maturin develop`), dependencies are installed in the backend venv, and there are no startup errors in the terminal running `uvicorn`.
+- If you see the UI banner "Cannot reach API …" make sure the Rust core is built (`maturin develop` in the same venv you use for `uvicorn`), dependencies are installed in the backend venv, and there are no startup errors in the terminal running `uvicorn`.
 
 ## How the functional requirements map
 Implemented highlights:

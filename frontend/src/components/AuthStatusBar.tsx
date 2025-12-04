@@ -1,5 +1,6 @@
 // frontend/src/components/AuthStatusBar.tsx
 import React from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const AuthStatusBar: React.FC = () => {
@@ -17,8 +18,14 @@ const AuthStatusBar: React.FC = () => {
     return (
       <div className="w-full bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800 flex justify-between items-center">
         <span>Ви не авторизовані. Деякі функції (імпорт, сценарії) недоступні.</span>
-        <span className="text-xs text-yellow-700">
+        <span className="flex items-center gap-2 text-xs text-yellow-700">
           Увійдіть як admin / operator для керування мережею.
+          <Link
+            to="/auth"
+            className="inline-flex items-center px-3 py-1 border border-yellow-400 rounded-full hover:bg-yellow-100"
+          >
+            Перейти до входу
+          </Link>
         </span>
       </div>
     );
